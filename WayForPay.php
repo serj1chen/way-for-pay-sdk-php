@@ -8,7 +8,7 @@
  *      $order = new WayForPay('test_merchant', 'dhkq3vUi94{Z!5frxs(02ML');
  *      $order->addProduct('Apple iPhone 6 16GB',1,1);
  *      $order->setMerchantDomainName('https://wayforpay.com');
- *      echo $order->getButtonPayment();
+ *      echo $order->getButtonPayment('Отправить', array('class'=>'paymentOrder', 'id'=>'btnPayment'));
  *
  * Class WayForPay
  * @author Chenakal Serhii
@@ -1151,11 +1151,10 @@ class WayForPay
     /**
      * Получить HTML с кнопкой оплаты
      * @param string $text Текст кнопки оплаты
-     * @param string $id Значения которое установится в атрибут id
-     * @param string $class Значения которое установится в атрибут class
+     * @param array $options Атрибуты для кнопки
      * @return string
      */
-    public function getButtonPayment($text = 'Send', $id = '', $class = '')
+    public function getButtonPayment($text = 'Send', $options = array())
     {
         if(!$this->getOrderDate()){
             $this->_setDefaultOrderDate();
@@ -1179,17 +1178,14 @@ class WayForPay
         }
         $html .= "<input type='hidden' name='merchantSignature' value='" . $this->getMerchantSignature() . "'>\n";
 
-        $html .= "<button type=submit>$text</button>\n";
+
+        $attrForButton = '';
+        foreach($options as $key => $value){
+            $attrForButton .= $key . "='$value' ";
+        }
+        $html .= "<button $attrForButton type='submit'>$text</button>\n";
         $html .= '</form>';
 
         return $html;
     }
 }
-
-$order = new WayForPay('test_merchant', 'dhkq3vUi94{Z!5frxs(02ML');
-$order->addProduct('Apple iPhone 6 16GB',1,1);
-
-$order->setMerchantDomainName('https://wayforpay.com');
-
-echo $order->getButtonPayment();
-

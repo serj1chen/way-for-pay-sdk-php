@@ -9,4 +9,4 @@
 
     $order->setMerchantDomainName('https://wayforpay.com');
 
-    echo $order->getButtonPayment();
+    echo $order->getButtonPayment('Отправить', array('class'=>'paymentOrder', 'id'=>'btnPayment'));
