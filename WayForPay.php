@@ -5,9 +5,15 @@
  * Принять платеж (Purchase)
  *
  * Пример:
- *      $order = new WayForPay('test_merchant', 'dhkq3vUi94{Z!5frxs(02ML');
- *      $order->addProduct('Apple iPhone 6 16GB',1,1);
- *      $order->setMerchantDomainName('https://wayforpay.com');
+ *      $order = new WayForPay1("test_merch_n1", "flk3409refn54t54t*FNJRET");
+ *      $order->addProduct("Процессор Intel Core i5-4670 3.4GHz",1000, 1)
+ *          ->addProduct("Память Kingston DDR3-1600 4096MB PC3-12800", 547.36, 1)
+ *          ->setMerchantDomainName('www.market.ua')
+ *          ->setOrderReference('55')
+ *          ->setOrderDate(1415379863)
+ *          ->setAmount(1547.36)
+ *          ->setCurrency('UAH');
+ *
  *      echo $order->getButtonPayment('Отправить', array('class'=>'paymentOrder', 'id'=>'btnPayment'));
  *
  * Class WayForPay
@@ -510,7 +516,7 @@ class WayForPay
     public function getProducts()
     {
         $products = array();
-        foreach($this->productName as $key => $item){
+        foreach ($this->productName as $key => $item) {
             $products[] = array(
                 'productName' => $item,
                 'productPrice' => $this->productPrice[$key],
@@ -1117,11 +1123,14 @@ class WayForPay
         );
 
         $values = array();
-        foreach($attrForSignature as $attr){
-            if($this->{$attr} === null){
+        foreach ($attrForSignature as $attr) {
+            if (empty($this->$attr)) {
+                throw new InvalidArgumentException("Argument $attr must be not empty");
+            }
+            if ($this->{$attr} === null) {
                 continue;
-            } elseif(is_array($this->{$attr})){
-                foreach($this->{$attr} as $item){
+            } elseif (is_array($this->{$attr})) {
+                foreach ($this->{$attr} as $item) {
                     $values[] = $item;
                 }
             } else {
@@ -1130,7 +1139,7 @@ class WayForPay
         }
 
         $string = implode(';', $values);
-        $merchantSignature = hash_hmac('MD5', $string, $this->getMerchantSecretKey());
+        $merchantSignature = hash_hmac('md5', $string, $this->merchantSecretKey);
         return $merchantSignature;
     }
 
@@ -1142,7 +1151,7 @@ class WayForPay
     protected function _setDefaultAmount()
     {
         $amount = 0;
-        foreach($this->productPrice as $price){
+        foreach ($this->productPrice as $price) {
             $amount += $price;
         }
         $this->setOrderDate($amount);
@@ -1156,20 +1165,20 @@ class WayForPay
      */
     public function getButtonPayment($text = 'Send', $options = array())
     {
-        if(!$this->getOrderDate()){
+        if (!$this->getOrderDate()) {
             $this->_setDefaultOrderDate();
         }
-        if(!$this->getAmount()){
+        if (!$this->getAmount()) {
             $this->_setDefaultAmount();
         }
 
         $html = "";
         $html .= "<form method='post' action='" . self::ADDRESS_URL_WAY_FOR_PAY . "'>\n";
-        foreach($this as $key => $attr){
-            if($this->{$key} === null || $key == 'merchantSecretKey'){
+        foreach ($this as $key => $attr) {
+            if ($this->{$key} === null || $key == 'merchantSecretKey') {
                 continue;
-            } elseif(is_array($this->{$key})){
-                foreach($this->{$key} as $item){
+            } elseif (is_array($this->{$key})) {
+                foreach ($this->{$key} as $item) {
                     $html .= "<input type='hidden' name='" . $key . "[]' value='" . $item . "'>\n";
                 }
             } else {
@@ -1178,9 +1187,8 @@ class WayForPay
         }
         $html .= "<input type='hidden' name='merchantSignature' value='" . $this->getMerchantSignature() . "'>\n";
 
-
         $attrForButton = '';
-        foreach($options as $key => $value){
+        foreach ($options as $key => $value) {
             $attrForButton .= $key . "='$value' ";
         }
         $html .= "<button $attrForButton type='submit'>$text</button>\n";
