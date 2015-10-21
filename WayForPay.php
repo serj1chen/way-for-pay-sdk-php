@@ -1173,7 +1173,7 @@ class WayForPay
         }
 
         $html = "";
-        $html .= "<form method='post' action='" . self::ADDRESS_URL_WAY_FOR_PAY . "'>\n";
+        $html .= "<form method='post' action='" . self::ADDRESS_URL_WAY_FOR_PAY . "' accept-charset='UTF-8>\n";
         foreach ($this as $key => $attr) {
             if ($this->{$key} === null || $key == 'merchantSecretKey') {
                 continue;
