@@ -255,9 +255,8 @@ class ResponsePayment extends WayForPay
             'amount',
             'currency',
             'authCode',
-            'cardPan',
             'transactionStatus',
-            'reasonCode ',
+            'reasonCode',
         );
 
         $values = array();
@@ -273,15 +272,25 @@ class ResponsePayment extends WayForPay
         return $merchantSignature;
     }
 
+    protected function getStatusesOnSuccess()
+    {
+        return array(
+            'InProcessing',
+            'Approved',
+        );
+    }
+
     /**
-     * Валидация ответа. Если true значить оплата пройшла
+     * Валидация ответа. Если true значить оплата пройшла или все хорошо
      * @return bool
      */
     public function validation()
     {
-        if(!$response = $this->generateMerchantSignature()){
-            return false;
-        }
-        return $this->merchantSignature == $response;
+//        if(!$response = $this->generateMerchantSignature()){
+//            return false;
+//        }
+//        return $this->merchantSignature == $response;
+
+        return in_array($this->getTransactionStatus(), $this->getStatusesOnSuccess());
     }
 }
